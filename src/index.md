@@ -1,111 +1,434 @@
 ---
+theme: dashboard
+title: Forecast demo
 toc: false
 ---
+# Forecasting demo walkthrough 🚀
 
-<div class="hero">
-  <h1>Finops Toolkit Ui</h1>
-  <h2>Welcome to your new app! Edit&nbsp;<code style="font-size: 90%;">src/index.md</code> to change this page.</h2>
-  <a href="https://observablehq.com/framework/getting-started">Get started<span style="display: inline-block; margin-left: 0.25rem;">↗︎</span></a>
-</div>
+## What we’ll try
 
-<div class="grid grid-cols-2" style="grid-auto-rows: 504px;">
-  <div class="card">${
-    resize((width) => Plot.plot({
-      title: "Your awesomeness over time 🚀",
-      subtitle: "Up and to the right!",
-      width,
-      y: {grid: true, label: "Awesomeness"},
-      marks: [
-        Plot.ruleY([0]),
-        Plot.lineY(aapl, {x: "Date", y: "Close", tip: true})
-      ]
-    }))
-  }</div>
-  <div class="card">${
-    resize((width) => Plot.plot({
-      title: "How big are penguins, anyway? 🐧",
-      width,
-      grid: true,
-      x: {label: "Body mass (g)"},
-      y: {label: "Flipper length (mm)"},
-      color: {legend: true},
-      marks: [
-        Plot.linearRegressionY(penguins, {x: "body_mass_g", y: "flipper_length_mm", stroke: "species"}),
-        Plot.dot(penguins, {x: "body_mass_g", y: "flipper_length_mm", stroke: "species", tip: true})
-      ]
-    }))
-  }</div>
-</div>
+We’ll create synthetic time series with:
+- Flat baseline (no noise)
+- Linear growth (no noise)
+- Flat/growth with occasional positive spikes (≤10% and ≤20%)
 
----
+For each, we’ll produce forecasts for the next month, quarter, and year, then plot actuals vs predictions
 
-## Next steps
+### Algorithms in plain language
 
-Here are some ideas of things you could try…
+Here’s what each method tries to do, in simple terms:
+- **SMA** (Simple Moving Average): Average of the last N points. Very stable, slow to react.
+- **ES** (Exponential Smoothing): Weighted average that favors recent data. Reacts faster than SMA.
+- **Holt‑Winters** (Triple Exponential Smoothing): Tracks level and trend (and seasonality if present). Good when there’s a slope and repeating patterns.
+- **ARIMA**: Statistical model for short‑term autocorrelation. Can capture persistence and mean‑reversion without seasonality.
+- **SARIMA**: ARIMA with seasonality. Useful if there’s a repeating weekly/monthly pattern.
+- **Theta**: Blend of level and trend lines. Often a strong baseline on simple series.
+- **Prophet**: Piecewise linear trend with changepoints plus seasonality priors. Adaptable when trends change.
+- **NeuralProphet**: Neural network version of Prophet—can fit flexible trends/seasonality; needs enough variation.
+- **Ensemble**: Average of available models to reduce variance and over‑/under‑reaction.
 
-<div class="grid grid-cols-4">
+## 0) Setup (one time per shell)
+
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+mkdir -p demo/input demo/out
+```
+
+## 1) Flat (no noise) — one‑year of daily data
+<!-- Load and transform the data -->
+```js
+const flat = FileAttachment("data/input/daily_flat.csv").csv({typed: true});
+const flatOut = FileAttachment("data/out/daily_flat_forecasts.csv").csv({typed: true});
+```
+```js
+const flatOutPivoted = pivotForecastData(flatOut);
+```
+
+First, a perfectly flat year with no noise.
+```bash
+python demo/generate_series.py \
+  --pattern flat --granularity daily --periods 365 \
+  --baseline 10 --noise 0.0 \
+  --out demo/input/daily_flat.csv
+```
+
+<div class="grid grid-cols-2">
   <div class="card">
-    Chart your own data using <a href="https://observablehq.com/framework/lib/plot"><code>Plot</code></a> and <a href="https://observablehq.com/framework/files"><code>FileAttachment</code></a>. Make it responsive using <a href="https://observablehq.com/framework/javascript#resize(render)"><code>resize</code></a>.
+    <h2>Flat</h2>
+    <span>${tableInput(flat)}</span>
   </div>
-  <div class="card">
-    Create a <a href="https://observablehq.com/framework/project-structure">new page</a> by adding a Markdown file (<code>whatever.md</code>) to the <code>src</code> folder.
-  </div>
-  <div class="card">
-    Add a drop-down menu using <a href="https://observablehq.com/framework/inputs/select"><code>Inputs.select</code></a> and use it to filter the data shown in a chart.
-  </div>
-  <div class="card">
-    Write a <a href="https://observablehq.com/framework/loaders">data loader</a> that queries a local database or API, generating a data snapshot on build.
-  </div>
-  <div class="card">
-    Import a <a href="https://observablehq.com/framework/imports">recommended library</a> from npm, such as <a href="https://observablehq.com/framework/lib/leaflet">Leaflet</a>, <a href="https://observablehq.com/framework/lib/dot">GraphViz</a>, <a href="https://observablehq.com/framework/lib/tex">TeX</a>, or <a href="https://observablehq.com/framework/lib/duckdb">DuckDB</a>.
-  </div>
-  <div class="card">
-    Ask for help, or share your work or ideas, on our <a href="https://github.com/observablehq/framework/discussions">GitHub discussions</a>.
-  </div>
-  <div class="card">
-    Visit <a href="https://github.com/observablehq/framework">Framework on GitHub</a> and give us a star. Or file an issue if you’ve found a bug!
+    <div class="card">
+    <span>${resize((width) => autoGraphInput(flat, {width}))}</span>
   </div>
 </div>
 
-<style>
+Now I run the forecaster and include an ensemble column which averages available models.
+```bash
+python forecast.py \
+  --input demo/input/daily_flat.csv \
+  --date-column PeriodStart --value-column Cost \
+  --ensemble > demo/out/daily_flat_forecasts.csv
+```
+The output CSV contains the original values and one column per forecasting method.
 
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: var(--sans-serif);
-  margin: 4rem 0 8rem;
-  text-wrap: balance;
-  text-align: center;
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Forecasted data </h2>
+    <span">${tableOutput(flatOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(flatOutPivoted, {width}))}</span>
+  </div>
+
+</div>
+
+## Growing a little each day
+
+<!-- Load and transform the data -->
+```js
+const growth = FileAttachment("data/input/daily_growth.csv").csv({typed: true});
+const growthOut = FileAttachment("data/out/daily_growth_forecasts.csv").csv({typed: true});
+```
+```js
+const growthOutPivoted = pivotForecastData(growthOut);
+```
+
+Second, a predictable linear growth pattern—half a unit per day.
+```bash
+python demo/generate_series.py \
+  --pattern upward_trend --granularity daily --periods 365 \
+  --baseline 10 --trend 0.5 --noise 0.0 \
+  --out demo/input/daily_growth.csv
+```
+The trend increases the baseline steadily; no noise keeps it clean for comparison.
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growing slowly</h2>
+    <span>${tableInput(growth)}</span>
+  </div>
+    <div class="card">
+    <span>${resize((width) => autoGraphInput(growth, {width}))}</span>
+  </div>
+</div>
+
+Now I run the forecaster and include an ensemble column which averages available models.
+```bash
+python forecast.py \
+  --input demo/input/daily_growth.csv \
+  --date-column PeriodStart --value-column Cost \
+  --ensemble > demo/out/daily_growth_forecasts.csv
+```
+The output CSV contains the original values and one column per forecasting method.
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data </h2>
+    <span">${tableOutput(growthOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(growthOutPivoted, {width}))}</span>
+  </div>
+</div>
+
+## 3) Flat with spikes (≤10% daily)
+
+<!-- Load and transform the data -->
+```js
+const flatBase10 = FileAttachment("data/input/daily_flat_10_base.csv").csv({typed: true});
+const flatSpikes10 = FileAttachment("data/input/daily_flat_spikes_10.csv").csv({typed: true});
+const flatSpikes10Out = FileAttachment("data/out/daily_flat_spikes_10_forecasts.csv").csv({typed: true});
+```
+```js
+const flatSpikes10OutPivoted = pivotForecastData(flatSpikes10Out);
+```
+
+Third, I introduce occasional positive spikes up to ten percent on a flat baseline.
+```bash
+python demo/generate_series.py \
+  --pattern flat --granularity daily --periods 365 \
+  --baseline 10 --noise 0.0 \
+  --out demo/input/daily_flat_10_base.csv
+python demo/add_spikes.py \
+  --input demo/input/daily_flat_10_base.csv \
+  --output demo/input/daily_flat_spikes_10.csv \
+  --max-pct 0.10 --prob 0.05
+```
+This applies bounded spikes (max ten percent) with a small daily probability, using a fixed seed for reproducibility.
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growing slowly</h2>
+    <span>${tableInput(flatSpikes10)}</span>
+  </div>
+    <div class="card">
+    <span>${resize((width) => autoGraphInput(flatSpikes10, {width}))}</span>
+  </div>
+</div>
+
+I'll run forecasts and show how each model handles transient spikes over the three horizons.
+```bash
+python forecast.py \
+  --input demo/input/daily_flat_spikes_10.csv \
+  --date-column PeriodStart --value-column Cost \
+  --ensemble > demo/out/daily_flat_spikes_10_forecasts.csv
+```
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data </h2>
+    <span">${tableOutput(flatSpikes10Out)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(flatSpikes10OutPivoted, {width}))}</span>
+  </div>
+</div>
+
+
+## 4) Flat with spikes (≤40% daily) 5% change of happening
+
+<!-- Load and transform the data -->
+```js
+const flatBase40 = FileAttachment("data/input/daily_flat_40_base.csv").csv({typed: true});
+const flatSpikes40 = FileAttachment("data/input/daily_flat_spikes_40.csv").csv({typed: true});
+const flatSpikes40Out = FileAttachment("data/out/daily_flat_spikes_40_forecasts.csv").csv({typed: true});
+```
+```js
+const flatSpikes40OutPivoted = pivotForecastData(flatSpikes40Out);
+```
+
+Third, I introduce occasional positive spikes up to fourty percent on a flat baseline.
+```bash
+python demo/generate_series.py \
+  --pattern flat --granularity daily --periods 365 \
+  --baseline 10 --noise 0.0 \
+  --out demo/input/daily_flat_40_base.csv
+python demo/add_spikes.py \
+  --input demo/input/daily_flat_40_base.csv \
+  --output demo/input/daily_flat_spikes_40.csv \
+  --max-pct 0.40 --prob 0.05
+```
+This applies bounded spikes (max 40 percent) with a small daily probability, using a fixed seed for reproducibility.
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growing slowly</h2>
+    <span>${tableInput(flatSpikes40)}</span>
+  </div>
+    <div class="card">
+    <span>${resize((width) => autoGraphInput(flatSpikes40, {width}))}</span>
+  </div>
+</div>
+
+I'll run forecasts and show how each model handles transient spikes over the three horizons.
+```bash
+python forecast.py \
+  --input demo/input/daily_flat_spikes_40.csv \
+  --date-column PeriodStart --value-column Cost \
+  --ensemble > demo/out/daily_flat_spikes_40_forecasts.csv
+```
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data </h2>
+    <span">${tableOutput(flatSpikes40Out)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(flatSpikes40OutPivoted, {width}))}</span>
+  </div>
+</div>
+
+## 5) Flat with spikes (≤33% daily) 15% change of happening
+
+<!-- Load and transform the data -->
+```js
+const flatBase33 = FileAttachment("data/input/daily_flat_33_base.csv").csv({typed: true});
+const flatSpikes33 = FileAttachment("data/input/daily_flat_spikes_33.csv").csv({typed: true});
+const flatSpikes33Out = FileAttachment("data/out/daily_flat_spikes_33_forecasts.csv").csv({typed: true});
+```
+```js
+const flatSpikes33OutPivoted = pivotForecastData(flatSpikes33Out);
+```
+
+Third, I introduce occasional positive spikes up to 33 percent on a flat baseline.
+```bash
+python demo/generate_series.py \
+  --pattern flat --granularity daily --periods 365 \
+  --baseline 10 --noise 0.0 \
+  --out demo/input/daily_flat_33_base.csv
+python demo/add_spikes.py \
+  --input demo/input/daily_flat_33_base.csv \
+  --output demo/input/daily_flat_spikes_33.csv \
+  --max-pct 0.33 --prob 0.05
+```
+This applies bounded spikes (max ten percent) with a 15% daily probability, using a fixed seed for reproducibility.
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growing slowly</h2>
+    <span>${tableInput(flatSpikes33)}</span>
+  </div>
+    <div class="card">
+    <span>${resize((width) => autoGraphInput(flatSpikes33, {width}))}</span>
+  </div>
+</div>
+
+I'll run forecasts and show how each model handles transient spikes over the three horizons.
+```bash
+python forecast.py \
+  --input demo/input/daily_flat_spikes_33.csv \
+  --date-column PeriodStart --value-column Cost \
+  --ensemble > demo/out/daily_flat_spikes_33_forecasts.csv
+```
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data </h2>
+    <span">${tableOutput(flatSpikes33Out)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(flatSpikes33OutPivoted, {width}))}</span>
+  </div>
+</div>
+
+## 6) Growth with spikes (≤33% daily) 15% change of happening
+
+<!-- Load and transform the data -->
+```js
+const growthBase33 = FileAttachment("data/input/daily_growth_33_base.csv").csv({typed: true});
+const growthSpike33 = FileAttachment("data/input/daily_growth_spikes_33.csv").csv({typed: true});
+const growthSpike33Out = FileAttachment("data/out/daily_growth_spikes_33_forecasts.csv").csv({typed: true});
+```
+```js
+const growthSpike33OutPivoted = pivotForecastData(growthSpike33Out);
+```
+
+Finally, growth with larger spikes up to twenty percent, stressing the models.
+
+```bash
+python demo/generate_series.py \
+  --pattern upward_trend --granularity daily --periods 365 \
+  --baseline 100 --trend 0.5 --noise 0.0 \
+  --out demo/input/daily_growth_33_base.csv
+python demo/add_spikes.py \
+  --input demo/input/daily_growth_33_base.csv \
+  --output demo/input/daily_growth_spikes_33.csv \
+  --max-pct 0.33 --prob 0.15
+```
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growing slowly</h2>
+    <span>${tableInput(growthSpike33)}</span>
+  </div>
+    <div class="card">
+    <span>${resize((width) => autoGraphInput(growthSpike33, {width}))}</span>
+  </div>
+</div>
+
+I'll run forecasts and show how each model handles transient spikes over the three horizons.
+```bash
+python forecast.py \
+  --input demo/input/daily_growth_spikes_33.csv \
+  --date-column PeriodStart --value-column Cost \
+  --ensemble > demo/out/daily_growth_spikes_33_forecasts.csv
+```
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data </h2>
+    <span">${tableOutput(growthSpike33Out)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(growthSpike33OutPivoted, {width}))}</span>
+  </div>
+</div>
+
+# Apendix
+
+```js
+function tableInput(data, {width} = {}){
+  return Inputs.table(data, {select: false})
 }
+```
 
-.hero h1 {
-  margin: 1rem 0;
-  padding: 1rem 0;
-  max-width: none;
-  font-size: 14vw;
-  font-weight: 900;
-  line-height: 1;
-  background: linear-gradient(30deg, var(--theme-foreground-focus), currentColor);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+```js
+function tableOutput(data, {width} = {}){
+  return Inputs.table(data, {
+    select: false,
+    columns: [
+      "PeriodStart",
+      "Cost",
+      "sma",
+      "es",
+      "hw", 
+      "arima",
+      "sarima",
+      "theta",
+      "prophet",
+      "ensemble"
+    ]
+  })
 }
+```
 
-.hero h2 {
-  margin: 0;
-  max-width: 34em;
-  font-size: 20px;
-  font-style: initial;
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--theme-foreground-muted);
+```js
+function autoGraphInput(data, {width} = {}) {
+  return Plot.plot({
+    y: {nice: true},
+    marks: [
+      Plot.ruleY([0]),
+      Plot.line(data, {
+        x: "PeriodStart", 
+        y: "Cost",
+        tip: true,
+      })
+    ]
+  })
 }
-
-@media (min-width: 640px) {
-  .hero h1 {
-    font-size: 90px;
-  }
+```
+```js
+function autoGraphOut(data, {width} = {}) {
+  return Plot.plot({
+    y: {nice: true},
+    marks: [
+      Plot.ruleY([0]),
+      Plot.ruleX([new Date]),
+      Plot.line(data, {
+        x: "PeriodStart", 
+        y: "Cost",
+        stroke: "Method",
+        tip: true,
+      })
+    ]
+  })
 }
+```
 
-</style>
+```js
+// Function to pivot forecast data so each method becomes a separate row, including original data
+function pivotForecastData(data) {
+  return data.flatMap(d => {
+    const forecastMethods = ['sma', 'es', 'hw', 'arima', 'sarima', 'theta', 'prophet', 'neural_prophet', 'darts', 'ensemble'];
+    
+    // Include original cost data
+    const originalData = {
+      PeriodStart: d.PeriodStart,
+      Cost: d.Cost,
+      Method: 'actual'
+    };
+    
+    // Include forecast data for each method
+    const forecastData = forecastMethods.map(method => ({
+      PeriodStart: d.PeriodStart,
+      Cost: d[method],
+      Method: method
+    })).filter(row => row.Cost !== null && row.Cost !== undefined);
+    
+    // Include original data if it has a cost value
+    const result = d.Cost !== null && d.Cost !== undefined ? [originalData, ...forecastData] : forecastData;
+    return result;
+  });
+}
+```
