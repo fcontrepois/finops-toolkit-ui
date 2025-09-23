@@ -80,8 +80,9 @@ The output CSV contains the original values and one column per forecasting metho
   <div class="card">
     <span>${resize((width) => autoGraphOut(flatOutPivoted, {width}))}</span>
   </div>
-
 </div>
+
+Good news, every forecasting method manage flat well.
 
 ## Growing a little each day
 
