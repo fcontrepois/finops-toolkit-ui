@@ -466,6 +466,51 @@ python demo/generate_series.py --pattern upward_trend --granularity daily --peri
   </div>
 </div>
 
+# Optional: tuning when seasonality is known
+
+If you know your industry has yearly seasonality (e.g., toys or holidays), the defaults already work reasonably well for daily data. Prophet has yearly seasonality enabled by default and tends to capture these patterns without extra tuning. If you want gentle tweaks:
+
+- Increase Prophet seasonality strength a bit
+- Keep weekly seasonality off (unless you truly have weekly patterns)
+- Leave Holt‑Winters as‑is for daily yearly seasonality unless you have ≥2 years of data (it needs at least 2×seasonal_periods)
+
+```bash
+# Daily data with yearly seasonality: nudge Prophet priors and keep ensemble
+python forecast.py \
+  --input demo/input/daily_flat_toys.csv \
+  --date-column PeriodStart --value-column Cost \
+  --prophet-yearly-seasonality true \
+  --prophet-weekly-seasonality false \
+  --prophet-changepoint-prior-scale 0.05 \
+  --prophet-seasonality-prior-scale 12.0 \
+  --ensemble > demo/out/daily_flat_toys_forecasts_tuned.csv
+```
+
+Notes:
+- Holt‑Winters on daily yearly patterns requires `--hw-seasonal-periods 365` and ≥730 days of history; otherwise it falls back to simple ES (current demo has 365 days, so fallback is expected).
+- If your data also has a weekly cycle, try setting `--prophet-weekly-seasonality true` and consider `--sarima-seasonal-order 1,0,1,7` (requires statsmodels), but only if you truly expect weekly effects.
+
+# A couple of alternative tuning examples
+
+```bash
+# Slightly more responsive moving average and ES
+python forecast.py \
+  --input demo/input/daily_growth_holidays.csv \
+  --date-column PeriodStart --value-column Cost \
+  --sma-window 14 \
+  --es-alpha 0.7 \
+  --ensemble > demo/out/daily_growth_holidays_forecasts_tuned_baselines.csv
+
+# Add weekly effects (only if real weekly pattern exists) and SARIMA weekly seasonality
+python forecast.py \
+  --input demo/input/daily_growth_holidays.csv \
+  --date-column PeriodStart --value-column Cost \
+  --prophet-weekly-seasonality true \
+  --sarima-order 1,1,1 \
+  --sarima-seasonal-order 1,0,1,7 \
+  --ensemble > demo/out/daily_growth_holidays_forecasts_with_weekly.csv
+```
+
 # Apendix
 
 ```js
