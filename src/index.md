@@ -346,6 +346,126 @@ python forecast.py \
   </div>
 </div>
 
+## 7) Daily seasonality — flat baseline (toys and holidays)
+
+<!-- Load and transform the data -->
+```js
+const dailyFlatToys = FileAttachment("data/input/daily_flat_toys.csv").csv({typed: true});
+const dailyFlatToysOut = FileAttachment("data/out/daily_flat_toys_forecasts.csv").csv({typed: true});
+const dailyFlatHolidays = FileAttachment("data/input/daily_flat_holidays.csv").csv({typed: true});
+const dailyFlatHolidaysOut = FileAttachment("data/out/daily_flat_holidays_forecasts.csv").csv({typed: true});
+```
+```js
+const dailyFlatToysOutPivoted = pivotForecastData(dailyFlatToysOut);
+const dailyFlatHolidaysOutPivoted = pivotForecastData(dailyFlatHolidaysOut);
+```
+
+Flat baseline (no noise) with two seasonal profiles applied externally, then forecasted.
+
+```bash
+python demo/generate_series.py --pattern flat --granularity daily --periods 365 --baseline 100 --noise 0.0 --out demo/input/daily_flat_base.csv && python demo/add_seasonality.py --input demo/input/daily_flat_base.csv --output demo/input/daily_flat_toys.csv --preset toys && python forecast.py --input demo/input/daily_flat_toys.csv --date-column PeriodStart --value-column Cost --ensemble > demo/out/daily_flat_toys_forecasts.csv && python demo/add_seasonality.py --input demo/input/daily_flat_base.csv --output demo/input/daily_flat_holidays.csv --preset holidays && python forecast.py --input demo/input/daily_flat_holidays.csv --date-column PeriodStart --value-column Cost --ensemble > demo/out/daily_flat_holidays_forecasts.csv
+```
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Flat + Toys seasonality</h2>
+    <span>${tableInput(dailyFlatToys)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphInput(dailyFlatToys, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data (Toys)</h2>
+    <span">${tableOutput(dailyFlatToysOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(dailyFlatToysOutPivoted, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Flat + Holidays seasonality</h2>
+    <span>${tableInput(dailyFlatHolidays)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphInput(dailyFlatHolidays, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data (Holidays)</h2>
+    <span">${tableOutput(dailyFlatHolidaysOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(dailyFlatHolidaysOutPivoted, {width}))}</span>
+  </div>
+</div>
+
+## 8) Daily seasonality — growth baseline (toys and holidays)
+
+<!-- Load and transform the data -->
+```js
+const dailyGrowthToys = FileAttachment("data/input/daily_growth_toys.csv").csv({typed: true});
+const dailyGrowthToysOut = FileAttachment("data/out/daily_growth_toys_forecasts.csv").csv({typed: true});
+const dailyGrowthHolidays = FileAttachment("data/input/daily_growth_holidays.csv").csv({typed: true});
+const dailyGrowthHolidaysOut = FileAttachment("data/out/daily_growth_holidays_forecasts.csv").csv({typed: true});
+```
+```js
+const dailyGrowthToysOutPivoted = pivotForecastData(dailyGrowthToysOut);
+const dailyGrowthHolidaysOutPivoted = pivotForecastData(dailyGrowthHolidaysOut);
+```
+
+Upward trend baseline with the same two seasonal profiles.
+
+```bash
+python demo/generate_series.py --pattern upward_trend --granularity daily --periods 365 --baseline 100 --trend 0.5 --noise 0.0 --out demo/input/daily_growth_base.csv && python demo/add_seasonality.py --input demo/input/daily_growth_base.csv --output demo/input/daily_growth_toys.csv --preset toys && python forecast.py --input demo/input/daily_growth_toys.csv --date-column PeriodStart --value-column Cost --ensemble > demo/out/daily_growth_toys_forecasts.csv && python demo/add_seasonality.py --input demo/input/daily_growth_base.csv --output demo/input/daily_growth_holidays.csv --preset holidays && python forecast.py --input demo/input/daily_growth_holidays.csv --date-column PeriodStart --value-column Cost --ensemble > demo/out/daily_growth_holidays_forecasts.csv
+```
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growth + Toys seasonality</h2>
+    <span>${tableInput(dailyGrowthToys)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphInput(dailyGrowthToys, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data (Toys)</h2>
+    <span">${tableOutput(dailyGrowthToysOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(dailyGrowthToysOutPivoted, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-2">
+  <div class="card">
+    <h2>Growth + Holidays seasonality</h2>
+    <span>${tableInput(dailyGrowthHolidays)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphInput(dailyGrowthHolidays, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Forecasted data (Holidays)</h2>
+    <span">${tableOutput(dailyGrowthHolidaysOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(dailyGrowthHolidaysOutPivoted, {width}))}</span>
+  </div>
+</div>
+
 # Apendix
 
 ```js
