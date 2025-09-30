@@ -511,6 +511,61 @@ python forecast.py \
   --ensemble > demo/out/daily_growth_holidays_forecasts_with_weekly.csv
 ```
 
+## 9) Tuned seasonal forecasts (examples)
+
+<!-- Load tuned outputs -->
+```js
+const dailyFlatToysTunedOut = FileAttachment("data/out/daily_flat_toys_forecasts_tuned.csv").csv({typed: true});
+const dailyGrowthHolidaysTunedOut = FileAttachment("data/out/daily_growth_holidays_forecasts_tuned.csv").csv({typed: true});
+```
+```js
+const dailyFlatToysTunedOutPivoted = pivotForecastData(dailyFlatToysTunedOut);
+const dailyGrowthHolidaysTunedOutPivoted = pivotForecastData(dailyGrowthHolidaysTunedOut);
+```
+
+Two tuned runs to illustrate parameter effects when yearly seasonality is known.
+
+```bash
+# Flat + toys seasonality (slightly stronger seasonality prior)
+python forecast.py \
+  --input demo/input/daily_flat_toys.csv \
+  --date-column PeriodStart --value-column Cost \
+  --prophet-yearly-seasonality true \
+  --prophet-weekly-seasonality false \
+  --prophet-changepoint-prior-scale 0.05 \
+  --prophet-seasonality-prior-scale 12.0 \
+  --ensemble > demo/out/daily_flat_toys_forecasts_tuned.csv
+
+# Growth + holidays seasonality (enable weekly; add SARIMA weekly component)
+python forecast.py \
+  --input demo/input/daily_growth_holidays.csv \
+  --date-column PeriodStart --value-column Cost \
+  --prophet-weekly-seasonality true \
+  --sarima-order 1,1,1 \
+  --sarima-seasonal-order 1,0,1,7 \
+  --ensemble > demo/out/daily_growth_holidays_forecasts_tuned.csv
+```
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Tuned forecast: Flat + Toys</h2>
+    <span">${tableOutput(dailyFlatToysTunedOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(dailyFlatToysTunedOutPivoted, {width}))}</span>
+  </div>
+</div>
+
+<div class="grid grid-cols-1">
+  <div class="card">
+    <h2>Tuned forecast: Growth + Holidays</h2>
+    <span">${tableOutput(dailyGrowthHolidaysTunedOut)}</span>
+  </div>
+  <div class="card">
+    <span>${resize((width) => autoGraphOut(dailyGrowthHolidaysTunedOutPivoted, {width}))}</span>
+  </div>
+</div>
+
 # Apendix
 
 ```js
