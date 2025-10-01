@@ -186,64 +186,10 @@ python forecast.py \
 </div>
 
 
-## 4) Flat with spikes (≤40% daily) 5% change of happening
+## 4) Flat with larger spikes (≤33% daily)
 
 <!-- Load and transform the data -->
 ```js
-const flatBase40 = FileAttachment("data/input/daily_flat_40_base.csv").csv({typed: true});
-const flatSpikes40 = FileAttachment("data/input/daily_flat_spikes_40.csv").csv({typed: true});
-const flatSpikes40Out = FileAttachment("data/out/daily_flat_spikes_40_forecasts.csv").csv({typed: true});
-```
-```js
-const flatSpikes40OutPivoted = pivotForecastData(flatSpikes40Out);
-```
-
-Third, I introduce occasional positive spikes up to fourty percent on a flat baseline.
-```bash
-python demo/generate_series.py \
-  --pattern flat --granularity daily --periods 365 \
-  --baseline 10 --noise 0.0 \
-  --out demo/input/daily_flat_40_base.csv
-python demo/add_spikes.py \
-  --input demo/input/daily_flat_40_base.csv \
-  --output demo/input/daily_flat_spikes_40.csv \
-  --max-pct 0.40 --prob 0.05
-```
-This applies bounded spikes (max 40 percent) with a small daily probability, using a fixed seed for reproducibility.
-
-<div class="grid grid-cols-2">
-  <div class="card">
-    <h2>Growing slowly</h2>
-    <span>${tableInput(flatSpikes40)}</span>
-  </div>
-    <div class="card">
-    <span>${resize((width) => autoGraphInput(flatSpikes40, {width}))}</span>
-  </div>
-</div>
-
-I'll run forecasts and show how each model handles transient spikes over the three horizons.
-```bash
-python forecast.py \
-  --input demo/input/daily_flat_spikes_40.csv \
-  --date-column PeriodStart --value-column Cost \
-  --ensemble > demo/out/daily_flat_spikes_40_forecasts.csv
-```
-
-<div class="grid grid-cols-1">
-  <div class="card">
-    <h2>Forecasted data </h2>
-    <span">${tableOutput(flatSpikes40Out)}</span>
-  </div>
-  <div class="card">
-    <span>${resize((width) => autoGraphOut(flatSpikes40OutPivoted, {width}))}</span>
-  </div>
-</div>
-
-## 5) Flat with spikes (≤33% daily) 15% change of happening
-
-<!-- Load and transform the data -->
-```js
-const flatBase33 = FileAttachment("data/input/daily_flat_33_base.csv").csv({typed: true});
 const flatSpikes33 = FileAttachment("data/input/daily_flat_spikes_33.csv").csv({typed: true});
 const flatSpikes33Out = FileAttachment("data/out/daily_flat_spikes_33_forecasts.csv").csv({typed: true});
 ```
@@ -251,7 +197,7 @@ const flatSpikes33Out = FileAttachment("data/out/daily_flat_spikes_33_forecasts.
 const flatSpikes33OutPivoted = pivotForecastData(flatSpikes33Out);
 ```
 
-Third, I introduce occasional positive spikes up to 33 percent on a flat baseline.
+Larger spikes up to 33 percent on a flat baseline, stressing the models more.
 ```bash
 python demo/generate_series.py \
   --pattern flat --granularity daily --periods 365 \
@@ -260,13 +206,13 @@ python demo/generate_series.py \
 python demo/add_spikes.py \
   --input demo/input/daily_flat_33_base.csv \
   --output demo/input/daily_flat_spikes_33.csv \
-  --max-pct 0.33 --prob 0.05
+  --max-pct 0.33 --prob 0.15
 ```
-This applies bounded spikes (max ten percent) with a 15% daily probability, using a fixed seed for reproducibility.
+This applies bounded spikes (max 33 percent) with higher daily probability, using a fixed seed for reproducibility.
 
 <div class="grid grid-cols-2">
   <div class="card">
-    <h2>Growing slowly</h2>
+    <h2>Flat with larger spikes</h2>
     <span>${tableInput(flatSpikes33)}</span>
   </div>
     <div class="card">
@@ -292,7 +238,7 @@ python forecast.py \
   </div>
 </div>
 
-## 6) Growth with spikes (≤33% daily) 15% change of happening
+## 5) Growth with spikes (≤33% daily) 15% change of happening
 
 <!-- Load and transform the data -->
 ```js
@@ -345,7 +291,7 @@ python forecast.py \
   </div>
 </div>
 
-## 7) Daily seasonality — flat baseline (toys and holidays)
+## 6) Daily seasonality — flat baseline (toys and holidays)
 
 <!-- Load and transform the data -->
 ```js
@@ -405,7 +351,7 @@ python demo/generate_series.py --pattern flat --granularity daily --periods 365 
   </div>
 </div>
 
-## 8) Daily seasonality — growth baseline (toys and holidays)
+## 7) Daily seasonality — growth baseline (toys and holidays)
 
 <!-- Load and transform the data -->
 ```js
@@ -510,7 +456,7 @@ python forecast.py \
   --ensemble > demo/out/daily_growth_holidays_forecasts_with_weekly.csv
 ```
 
-## 9) Tuned seasonal forecasts (examples)
+## 8) Tuned seasonal forecasts (examples)
 
 <!-- Load tuned outputs -->
 ```js
