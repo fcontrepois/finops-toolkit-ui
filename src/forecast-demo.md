@@ -4,6 +4,8 @@ toc: false
 ---
 # Forecasting demo walkthrough 🚀
 
+> “Goal: build a compelling demo using only composable pieces. As context evolved, new micro-tools appeared.”
+
 ## What we’ll try
 
 We’ll create synthetic time series with:
@@ -25,6 +27,15 @@ Here’s what each method tries to do, in simple terms:
 - **Prophet**: Piecewise linear trend with changepoints plus seasonality priors. Adaptable when trends change.
 - **NeuralProphet**: Neural network version of Prophet—can fit flexible trends/seasonality; needs enough variation.
 - **Ensemble**: Average of available models to reduce variance and over‑/under‑reaction.
+
+### Mini-map: how context shaped the tools
+
+1. **Baseline** – Needed clean daily data → `generate_series.py`
+2. **Spikes appear** – Added `add_spikes.py` to simulate noisy launches
+3. **Seasonality shows up** – Built `add_seasonality.py`
+4. **Forecast tuning** – Tweaked parameters for specific business patterns
+
+Each step uses the same pipe-first workflow so you can remix or extend it.
 
 ## 0) Setup (one time per shell)
 
@@ -133,6 +144,7 @@ The output CSV contains the original values and one column per forecasting metho
 </div>
 
 ## 3) Flat with spikes (≤10% daily)
+**Why it matters:** Shows how small, infrequent spikes nudge forecasts and why ensemble smoothing helps avoid overreacting.
 
 <!-- Load and transform the data -->
 ```js
@@ -187,6 +199,7 @@ python forecast.py \
 
 
 ## 4) Flat with larger spikes (≤33% daily)
+**Why it matters:** Bigger spikes with higher probability stress models—useful for promo-heavy or launch-driven workloads.
 
 <!-- Load and transform the data -->
 ```js
@@ -239,6 +252,7 @@ python forecast.py \
 </div>
 
 ## 5) Growth with spikes (≤33% daily) 15% change of happening
+**Why it matters:** Real FinOps pipelines often mix trend + events; this section shows interplay of growth and burstiness.
 
 <!-- Load and transform the data -->
 ```js
@@ -292,6 +306,7 @@ python forecast.py \
 </div>
 
 ## 6) Daily seasonality — flat baseline (toys and holidays)
+**Why it matters:** Retail-style cyclicality; illustrates how external adapters layer in context before forecasting.
 
 <!-- Load and transform the data -->
 ```js
@@ -352,6 +367,7 @@ python demo/generate_series.py --pattern flat --granularity daily --periods 365 
 </div>
 
 ## 7) Daily seasonality — growth baseline (toys and holidays)
+**Why it matters:** Growth + seasonality is a classic FinOps forecasting headache; compare outputs before tuning.
 
 <!-- Load and transform the data -->
 ```js
@@ -457,6 +473,7 @@ python forecast.py \
 ```
 
 ## 8) Tuned seasonal forecasts (examples)
+**Why it matters:** Demonstrates parameter tuning (Prophet priors, SARIMA weekly) once you know the business rhythm.
 
 <!-- Load tuned outputs -->
 ```js

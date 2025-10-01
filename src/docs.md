@@ -5,9 +5,12 @@ layout: default
 
 # Documentation
 
-- Forecast tool: see repository `documentation/FORECAST.md`
-- Coding standards (pipe-first): see `documentation/CODING_STANDARDS.md`
-- Command architecture: see `documentation/COMMAND_ARCHITECTURE.md`
+Need more depth? Jump into the repo docs with context-aware breadcrumbs.
+
+- **Forecast tool** – high-level concepts, CLI flags, tuning guidance (`documentation/FORECAST.md`).
+- **Coding standards** – pipe-first expectations, error codes, stdin/stdout etiquette (`documentation/CODING_STANDARDS.md`).
+- **Command architecture** – how commands stay independent yet composable (`documentation/COMMAND_ARCHITECTURE.md`).
+- **Contributing** – short version: fork, branch, pipe everything; see CONTRIBUTING.md (coming soon) or open an issue.
 
 ## Pipe-first quick starts
 ```bash
@@ -23,4 +26,6 @@ python demo/generate_series.py --pattern upward_trend --granularity daily --peri
 | python demo/add_seasonality.py --preset holidays \
 | python forecast.py --date-column PeriodStart --value-column Cost --ensemble
 ```
+
+Want more? Open an issue with your context and we’ll help design the pipeline.
 

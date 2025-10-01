@@ -7,24 +7,13 @@ layout: default
 
 Reference: FinOps Foundation Use Cases [finops.org/finops-use-cases](https://www.finops.org/finops-use-cases/)
 
-## Examples
-- Cost allocation (by service/account/tag)
-  - Pipeline: `cost_and_usage` → group/aggregate → export
-  - Status: exists
-- Budget tracking & variance
-  - Pipeline: `cost_and_usage` → `budget_analysis` (alerts optional)
-  - Status: exists
-- Anomaly detection
-  - Pipeline: `cost_and_usage` → `forecast` → `anomaly_detection_forecast`
-  - Status: exists (threshold-based)
-- Forecasting and planning
-  - Pipeline: your CSV → `forecast` (optional ensemble)
-  - Status: exists
-- Unit cost tracking
-  - Pipeline: join usage metrics → compute unit metrics → `forecast`
-  - Status: planned (join/transform micro-tools)
-- Savings coverage/optimization
-  - Pipeline: cost baselines → commitment evaluation (RI/SP) → report
-  - Status: planned (commitment analysis micro-tool)
+| Use case | Typical question | Example pipeline | Status / notes |
+|----------|------------------|------------------|----------------|
+| Cost allocation | “Who spent what?” | `aws/cost_and_usage.py --group SERVICE` → (optional adapter) → CSV export | ✅ ready |
+| Budget tracking & variance | “Are we burning the budget too fast?” | `cost_and_usage` → `aws/budget_analysis.py --budget-name ...` | ✅ ready; add alert thresholds per team |
+| Anomaly detection | “Is today’s spike normal?” | `cost_and_usage` → `forecast.py --ensemble` → `aws/anomaly_detection_forecast.py` | ✅ ready; thresholds configurable |
+| Forecasting & planning | “What will next quarter cost?” | source CSV → adapters (`add_spikes`, `add_seasonality`) → `forecast.py` → dashboards | ✅ demo-ready, extend for prod |
+| Unit cost tracking | “Is cost per transaction improving?” | spend CSV + usage metrics → join adapter (planned) → `forecast`/report | 🔜 needs join micro-tool |
+| Commitment coverage | “Do we have enough RIs/SPs?” | `cost_and_usage` → (planned commitment analyzer) → summary | 🔜 needs commitment analyzer |
 
-Suggest a use case or tool gap: open an issue in the repo.
+Have an idea? File an issue, or drop a PR with a new micro-tool pipe.
