@@ -7,7 +7,7 @@ export default {
   // all pages will be listed in alphabetical order. Listing pages explicitly
   // lets you organize them into sections and have unlisted pages.
   pages: [
-    {name: "Home", path: "/home"},
+    {name: "Home", path: "/"},
     {name: "Forecast demo", path: "/forecast-demo"},
     {name: "Tools", path: "/tools"},
     {name: "Use cases", path: "/use-cases"},
