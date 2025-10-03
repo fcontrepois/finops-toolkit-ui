@@ -1,57 +1,59 @@
+# Context is Everything  
+
+Data isn’t useful until it becomes *your* data.  
+
+Dashboards and reports stop one step short of being truly helpful. They give you numbers, but not meaning. The same data can mean very different things depending on time, role, urgency, or industry.  
+
+At Coblan, we build the **last mile**: micro tools that transform generic data into specific, actionable insights. Each tool is small, fast, and inexpensive to create — often in 15 minutes or less.  
+
 ---
-title: Context is everything
+
+## Everyday Context Shifts  
+
+The same number, the same chart, even the same alert — their meaning changes depending on context.  
+
+- **12°C** is *cold* in London in July, *warm* in Oslo in January, and *critical* if you’re storing medicine.  
+- **$1,000 in cloud costs** might be *noise* for a global enterprise, but a *major issue* for a startup.  
+- **90% system utilization** could mean *great efficiency* for one team, but *risk of failure* for another.  
+
+**Context turns data into information. Without it, we’re left guessing.**
+
 ---
 
-# Context is everything
+## Building the Last Mile  
 
-- Generic tools solve generic problems for generic users. But no one is generic.
-- The same "all good" signal means different things in different contexts.
-- Good FinOps answers are situational: same data, different actions depending on time, audience, and constraints.
+The last mile is where data becomes meaningful. It can be:  
 
-## Why this project exists
+- a tailored chart  
+- a one-line script  
+- a daily forecast in Slack  
+- or even a voice response  
 
-- **Before**: generic dashboards shout "cost anomaly" without telling you if it is launch day, month-end, or a billing bug.
-- **After**: tiny, composable tools let you adjust the message to *your* reality—seasonality, closing windows, on-call posture.
-- **How**: treat every question as a pipeline (`source → adapter → model → decision`) and add thin layers of context exactly where they matter.
+What matters is that it fits your role, your urgency, your situation.  
 
-```
-┌────────────┐   ┌──────────┐   ┌────────┐   ┌──────────┐
-│ CSV / API │ → │ adapters │ → │ models │ → │ decision │
-└────────────┘   └──────────┘   └────────┘   └──────────┘
-```
+---
 
-## Everyday context shifts
+## Micro Tools, Maximum Impact  
 
-Imagine you open a weather app. It says: “12 degrees.”
+Instead of massive platforms, we build **micro tools**: focused, lightweight applications that solve *your problem, right now, in your context.*  
 
-Okay… but what does that mean?
+- Built in minutes, not months  
+- Inexpensive to create and adapt  
+- Easy to share and extend  
 
-In London in July, that’s cold.
-In Oslo in January, that’s warm.
-If you’re going for a run, it’s uncomfortable.
-If you’re storing vaccines, it’s a disaster.
+Each micro tool is simple. But in context, it’s powerful.  
 
-Same number. Same data. But the meaning changes completely depending on the context.
+---
 
-And this is the trap with generic dashboards and generic tools. They stop one step short of being useful. They give you data, but not your data. They don’t bridge the “last mile” — the point where information becomes specific, relevant, and actionable.
+## Explore the Demos  
 
-That’s what Coblan (and me) is about. We build that last mile.
-Not with giant platforms or one-size-fits-all dashboards — but with micro tools: tiny, fast, cheap applications that transform generic data into your data.
+- [**FinOps Toolkit**](https://fcontrepois.github.io/finops-toolkit-ui/)  
+  Flexible components for cloud cost insights.  
 
-A micro tool can be built in 15 minutes. It doesn’t try to solve everything. It solves your problem, right now, in your context.
+- [**Forecast Demo**](https://fcontrepois.github.io/finops-toolkit-ui/forecast-demo)  
+  A quick way to see cost forecasts tailored to your data.  
 
-The future isn’t generic tools. It’s context-specific micro tools that make data meaningful for me. At Coblan, that’s what we do: we engineer the context, so that every answer, every report, every dashboard is not just data — it’s my data.
+- [**Tool Examples**](https://fcontrepois.github.io/finops-toolkit-ui/tools)  
+  A collection of micro tools, each built in minutes.  
 
-## How we respond to context
-- Start with generic micro-tools (CSV in/out; composable with pipes).
-- Add thin adapters encoding local context (seasonality, thresholds, SLA windows).
-- Tune parameters (don't hard-code "universal" rules).
-
-> “Once we added the seasonal adapter, the on-call stopped getting paged every time marketing ran a promo.” – A relieved FinOps lead
-
-## Get started
-- **[Forecast demo](./forecast-demo)** – Watch the “build a demo” journey and see each adapter/tool appear as context evolves.
-- **[Tools](./tools)** – Browse every micro-tool, grouped by lifecycle, with pipe-first examples and deep links to documentation.
-- **[Use cases](./use-cases)** – Map classic FinOps questions to pipelines; spot what exists today and where contributions are welcome.
-- **[Docs](./docs)** – Quick launchpad into standards, architecture, and contribution guidelines.
-- Feeling playful? Try imagining how context changes a non-FinOps scenario (concert planning, cooking, road-trips)—it works there too.
+---
