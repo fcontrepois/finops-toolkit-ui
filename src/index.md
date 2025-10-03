@@ -22,6 +22,26 @@ title: Context is everything
 
 ## Everyday context shifts
 
+Imagine you open a weather app. It says: “12 degrees.”
+
+Okay… but what does that mean?
+
+In London in July, that’s cold.
+In Oslo in January, that’s warm.
+If you’re going for a run, it’s uncomfortable.
+If you’re storing vaccines, it’s a disaster.
+
+Same number. Same data. But the meaning changes completely depending on the context.
+
+And this is the trap with generic dashboards and generic tools. They stop one step short of being useful. They give you data, but not your data. They don’t bridge the “last mile” — the point where information becomes specific, relevant, and actionable.
+
+That’s what Coblan (and me) is about. We build that last mile.
+Not with giant platforms or one-size-fits-all dashboards — but with micro tools: tiny, fast, cheap applications that transform generic data into your data.
+
+A micro tool can be built in 15 minutes. It doesn’t try to solve everything. It solves your problem, right now, in your context.
+
+The future isn’t generic tools. It’s context-specific micro tools that make data meaningful for me. At Coblan, that’s what we do: we engineer the context, so that every answer, every report, every dashboard is not just data — it’s my data.
+
 ## How we respond to context
 - Start with generic micro-tools (CSV in/out; composable with pipes).
 - Add thin adapters encoding local context (seasonality, thresholds, SLA windows).
