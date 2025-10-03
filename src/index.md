@@ -21,26 +21,6 @@ title: Context is everything
 ```
 
 ## Everyday context shifts
-- **All is OK**
-  - ICU patient: stabilizing = success; tiny regressions matter.
-  - Dinner plans: restaurant open and a table soon = success; small delays don't.
-- **Will they close?**
-  - Seller day 5: "Likely" = nurture; build momentum.
-  - Seller day 89 (end of Q): "Likely" = act now; escalate resources.
-- **Cost is flat**
-  - Startup: flat = risk (no growth); investigate adoption.
-  - Cost crisis: flat = win (stopped the bleed).
-
-## FinOps context shifts
-- **Under budget by 5%**
-  - Before RI/SP commitment window: may be fine to commit more.
-  - After procurement freeze: could be a miss (under-investment).
-- **Forecast up 12% next month**
-  - Seasonal retail in Nov/Dec: expected; align with revenue plan.
-  - SaaS mid‑quarter with no launches: anomaly; triage tags/services/owners.
-- **High spend on Service X**
-  - Launch week: planned; focus on unit cost vs feature success.
-  - Steady-state: unplanned; check autoscaling/idle/misrouting.
 
 ## How we respond to context
 - Start with generic micro-tools (CSV in/out; composable with pipes).
